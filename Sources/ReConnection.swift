@@ -1,10 +1,11 @@
 import Foundation
+import Socket
 
 private typealias ReQueryToken = UInt64
 
 private struct ReTokenCounter {
 	private var nextQueryToken: UInt64 = 0x5ADFACE
-	private var queue = dispatch_queue_create("nl.pixelspark.Rethink.ReTokenCounter", DISPATCH_QUEUE_SERIAL)
+	private var queue = dispatch_queue_create("com.whisperlab.Rethink.ReTokenCounter", DISPATCH_QUEUE_SERIAL)
 
 	mutating func next() -> ReQueryToken {
 		var nt: UInt64 = 0
@@ -26,7 +27,7 @@ private class ReSocket: GCDAsyncSocketDelegate {
 	typealias WriteCallback = (String?) -> ()
 	typealias ReadCallback = (NSData?) -> ()
 
-	let socket: GCDAsyncSocket
+	let socket: Socket
 	private var state: ReSocketState = .Unconnected
 
 	private var onConnect: ((String?) -> ())?
@@ -34,8 +35,9 @@ private class ReSocket: GCDAsyncSocketDelegate {
 	private var readCallbacks: [Int: ReadCallback] = [:]
 
 	init(queue: dispatch_queue_t) {
-		self.socket = GCDAsyncSocket(delegate: nil, delegateQueue: queue)
-		self.socket.delegate = self
+		//self.socket = GCDAsyncSocket(delegate: nil, delegateQueue: queue)
+		self.socket = Socket.create()
+		//self.socket.delegate = self
 	}
 
 	func connect(url: NSURL, callback: (String?) -> ()) {
@@ -47,19 +49,19 @@ private class ReSocket: GCDAsyncSocketDelegate {
 		let port = url.port ?? 28015
 
 		do {
-			try socket.connectToHost(host, onPort: port.unsignedShortValue)
+			try socket.connect(to: host, port: port.unsignedShortValue)
 		}
 		catch let e as NSError {
 			return callback(e.localizedDescription)
 		}
 	}
 
-	@objc private func socket(sock: GCDAsyncSocket!, didConnectToHost host: String!, port: UInt16) {
+	@objc private func socket(sock: Socket!, didConnectToHost host: String!, port: UInt16) {
 		self.state = .Connected
 		self.onConnect?(nil)
 	}
 
-	@objc private func socketDidDisconnect(sock: GCDAsyncSocket!, withError err: NSError!) {
+	@objc private func socketDidDisconnect(sock: Socket!, withError err: NSError!) {
 		self.state = .Unconnected
 	}
 
@@ -110,7 +112,7 @@ private class ReSocket: GCDAsyncSocketDelegate {
 		}
 	}
 
-	@objc private func socket(sock: GCDAsyncSocket!, didWriteDataWithTag tag: Int) {
+	@objc private func socket(sock: Socket!, didWriteDataWithTag tag: Int) {
 		dispatch_async(socket.delegateQueue) {
 			if let cb = self.writeCallbacks[tag] {
 				cb(nil)
@@ -119,7 +121,7 @@ private class ReSocket: GCDAsyncSocketDelegate {
 		}
 	}
 
-	@objc private func socket(sock: GCDAsyncSocket!, didReadData data: NSData!, withTag tag: Int) {
+	@objc private func socket(sock: Socket!, didReadData data: NSData!, withTag tag: Int) {
 		dispatch_async(socket.delegateQueue) {
 			if let cb = self.readCallbacks[tag] {
 				cb(data)
@@ -129,12 +131,12 @@ private class ReSocket: GCDAsyncSocketDelegate {
 	}
 
 	func disconnect() {
-		self.socket.disconnect()
+		self.socket.close()
 		self.state = .Unconnected
 	}
 
 	deinit {
-		self.socket.disconnect()
+		self.socket.close()
 	}
 }
 
@@ -161,7 +163,7 @@ public class ReConnection: NSObject, GCDAsyncSocketDelegate {
 	private var onConnectCallback: ((String?) -> ())? = nil
 
 	private static var tokenCounter = ReTokenCounter()
-	private let queue = dispatch_queue_create("nl.pixelspark.Rethink.ReConnectionQueue", DISPATCH_QUEUE_SERIAL)
+	private let queue = dispatch_queue_create("com.whisperlab.Rethink.ReConnectionQueue", DISPATCH_QUEUE_SERIAL)
 
 	/** Create a connection to a RethinkDB instance. The URL should be of the form 'rethinkdb://host:port'. If
 	no port is given, the default port is used. If the server requires the use of an authentication key, put it
