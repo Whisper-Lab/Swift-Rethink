@@ -1,2 +1,9 @@
+.DS_Store
+/.build
+/Packages
+/log/*
+
 Rethink.xcodeproj/project.xcworkspace/xcuserdata
 Rethink.xcodeproj/xcuserdata
+
+.swift-version
