@@ -27,7 +27,7 @@ internal class SysUtils {
     /// - Parameter lock: Pointer to the mutex lock
     /// - Parameter block: closure () -> Void 
     ///
-    public static func doOnce(_ lock: UnsafeMutablePointer<Int>, block: () -> Void) {
+    internal static func doOnce(_ lock: UnsafeMutablePointer<Int>, block: () -> Void) {
         dispatch_once(lock, block)
     }
 

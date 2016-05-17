@@ -49,7 +49,7 @@ public class ReDatum: ReQueryValue {
 	}
 
 	internal init(data: NSData) {
-		self.jsonSerialization = [ReDatum.reqlSpecialKey: ReDatum.reqlTypeBinary, "data": data.base64EncodedStringWithOptions([])]
+        self.jsonSerialization = [ReDatum.reqlSpecialKey: ReDatum.reqlTypeBinary, "data": data.base64EncodedString([])]
 	}
 
 	internal init(jsonSerialization: AnyObject) {
@@ -59,15 +59,15 @@ public class ReDatum: ReQueryValue {
 	internal var value: AnyObject { get {
 		if let d = self.jsonSerialization as? [String: AnyObject], let t = d[ReDatum.reqlSpecialKey] as? String {
 			if t == ReDatum.reqlTypeBinary {
-				if let data = self.jsonSerialization.valueForKey("data") as? String {
-					return NSData(base64EncodedString: data, options: [])!
+                if let data = self.jsonSerialization.value(forKey: "data") as? String {
+					return NSData(base64Encoded: data, options: [])!
 				}
 				else {
 					fatalError("invalid binary datum received")
 				}
 			}
 			else if t == ReDatum.reqlTypeTime {
-				if let epochTime = self.jsonSerialization.valueForKey("epoch_time"), let timezone = self.jsonSerialization.valueForKey("timezone") as? String {
+                if let epochTime = self.jsonSerialization.value(forKey: "epoch_time"), let timezone = self.jsonSerialization.value(forKey: "timezone") as? String {
 					// TODO: interpret server timezone other than +00:00 (UTC)
 					assert(timezone == "+00:00", "support for timezones other than UTC not implemented (yet)")
 					return NSDate(timeIntervalSince1970: epochTime.doubleValue!)

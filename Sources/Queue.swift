@@ -39,7 +39,7 @@ internal class Queue {
     ///
     /// - Returns: Queue instance 
     ///
-    public init(type: QueueType, label: String?=nil) {
+    internal init(type: QueueType, label: String?=nil) {
         let concurrent = DISPATCH_QUEUE_CONCURRENT
         let serial = DISPATCH_QUEUE_SERIAL
 
@@ -53,7 +53,7 @@ internal class Queue {
     /// 
     /// - Parameter block: a closure () -> Void  
     ///
-    public func queueAsync(_ block: () -> Void) {
+    internal func queueAsync(_ block: () -> Void) {
         dispatch_async(osQueue, block)
     }
 
@@ -62,7 +62,7 @@ internal class Queue {
     ///
     /// - Parameter block: a closure () -> Void
     ///
-    public func queueSync(_ block: () -> Void) {
+    internal func queueSync(_ block: () -> Void) {
         dispatch_sync(osQueue, block)
     }
 
@@ -73,7 +73,7 @@ internal class Queue {
     /// - Parameter queue: Queue
     /// - Parameter block: a closure () -> Void 
     ///
-    public static func queueIfFirstOnMain(queue: Queue, block: () -> Void) {
+    internal static func queueIfFirstOnMain(queue: Queue, block: () -> Void) {
         var onQueue = true
 
         SysUtils.doOnce(&onMainOnceLock) {
