@@ -2,7 +2,15 @@ import PackageDescription
 
 let package = Package(
     name: "Rethink",
-    targets: [Target(name: "Rethink")],
+    targets: [
+        Target(
+            name: "SCRAM"
+        ),
+        Target(
+            name: "Rethink",
+            dependencies: [.Target(name: "SCRAM")]
+        )
+    ],
     dependencies: [
         .Package(url: "https://github.com/IBM-Swift/BlueSocket.git", majorVersion: 0, minor: 5)
     ],

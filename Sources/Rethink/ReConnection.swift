@@ -1,5 +1,6 @@
 import Foundation
 import Socket
+import SCRAM
 
 private typealias ReQueryToken = UInt64
 
