@@ -1,5 +1,6 @@
 import XCTest
-import Rethink
+
+@testable import Rethink
 
 class RethinkTests: XCTestCase {
 	private func asyncTest(block: (callback: () -> ()) -> ()) {

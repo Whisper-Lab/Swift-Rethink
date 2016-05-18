@@ -1,27 +1,3 @@
-/**  Rethink.swift
-Copyright (c) 2015 Pixelspark
-Author: Tommy van der Vorst (tommy@pixelspark.nl)
-
-Permission is hereby granted, free of charge, to any person
-obtaining a copy of this software and associated documentation
-files (the "Software"), to deal in the Software without
-restriction, including without limitation the rights to use,
-copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following
-conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-OTHER DEALINGS IN THE SOFTWARE. **/
 import Foundation
 
 public class R {
@@ -36,7 +12,7 @@ public class R {
 
 	public static func connect(url: NSURL, user: String = ReProtocol.defaultUser, password: String = ReProtocol.defaultPassword, version: ReProtocolVersion = .V1_0, callback: (ReError?, ReConnection) -> ()) {
 		let c = ReConnection(url: url, protocolVersion: version)
-		c.connect(user, password: password) { err in
+        c.connect(username: user, password: password) { err in
 			callback(err, c)
 		}
 	}
@@ -170,7 +146,7 @@ public class R {
 	}
 
 	public static func grant(userName: String, permissions: RePermission...) -> ReQueryValue {
-		return ReDatum(jsonSerialization: [ReTerm.GRANT.rawValue, [userName], R.optargs(permissions)])
+        return ReDatum(jsonSerialization: [ReTerm.GRANT.rawValue, [userName], R.optargs(args: permissions)])
 	}
 
 	public static var minVal: ReQueryValue {
@@ -189,11 +165,11 @@ public class R {
 	point object. The radius is a floating point number whose units are meters by default, although that may be changed 
 	with the unit argument. */
 	public static func circle(longitude: ReQueryValue, latitude: ReQueryValue, radius: ReQueryValue, options: ReCircleArg...) -> ReQueryValue {
-		return ReDatum(jsonSerialization: [ReTerm.CIRCLE.rawValue, [longitude.jsonSerialization, latitude.jsonSerialization, radius.jsonSerialization], R.optargs(options)])
+		return ReDatum(jsonSerialization: [ReTerm.CIRCLE.rawValue, [longitude.jsonSerialization, latitude.jsonSerialization, radius.jsonSerialization], R.optargs(args: options)])
 	}
 
 	public static func circle(point: ReQueryPoint, radius: ReQueryValue, options: ReCircleArg...) -> ReQueryValue {
-		return ReDatum(jsonSerialization: [ReTerm.CIRCLE.rawValue, [point.jsonSerialization, radius.jsonSerialization], R.optargs(options)])
+		return ReDatum(jsonSerialization: [ReTerm.CIRCLE.rawValue, [point.jsonSerialization, radius.jsonSerialization], R.optargs(args: options)])
 	}
 
 	/** Compute the distance between a point and another geometry object. At least one of the geometry objects specified
@@ -205,7 +181,7 @@ public class R {
 	model, the results of distance should be considered approximate due to the deviation between the ellipsoid and spherical 
 	models. */
 	public func distance(from: ReQueryGeometry, to: ReQueryGeometry, options: ReDistanceArg...) -> ReQueryValue {
-		return ReDatum(jsonSerialization: [ReTerm.DISTANCE.rawValue, [from.jsonSerialization, to.jsonSerialization], R.optargs(options)])
+		return ReDatum(jsonSerialization: [ReTerm.DISTANCE.rawValue, [from.jsonSerialization, to.jsonSerialization], R.optargs(args: options)])
 	}
 
 	/** Convert a GeoJSON object to a ReQL geometry object.
@@ -242,7 +218,7 @@ public class ReQueryDatabase: ReQuery {
 	}
 
 	public func tableCreate(name: String, options: ReTableCreateArg...) -> ReQueryValue {
-		return ReDatum(jsonSerialization: [ReTerm.TABLE_CREATE.rawValue, [self.jsonSerialization, name], R.optargs(options)])
+		return ReDatum(jsonSerialization: [ReTerm.TABLE_CREATE.rawValue, [self.jsonSerialization, name], R.optargs(args: options)])
 	}
 
 	public func tableDrop(name: String) -> ReQueryValue {
@@ -262,7 +238,7 @@ public class ReQueryDatabase: ReQuery {
 	}
 
 	public func grant(userName: String, permissions: RePermission...) -> ReQueryValue {
-		return ReDatum(jsonSerialization: [ReTerm.GRANT.rawValue, [self.jsonSerialization, userName], R.optargs(permissions)])
+		return ReDatum(jsonSerialization: [ReTerm.GRANT.rawValue, [self.jsonSerialization, userName], R.optargs(args: permissions)])
 	}
 }
 
@@ -306,7 +282,7 @@ public class ReQuerySequence: ReQuery {
 		for (k, v) in specification {
 			serialized[k] = v.jsonSerialization
 		}
-		return ReQuerySequence(jsonSerialization: [ReTerm.FILTER.rawValue, [self.jsonSerialization, serialized], R.optargs(options)])
+		return ReQuerySequence(jsonSerialization: [ReTerm.FILTER.rawValue, [self.jsonSerialization, serialized], R.optargs(args: options)])
 	}
 
 	public func filter(predicate: RePredicate) -> ReQuerySequence {
@@ -328,7 +304,7 @@ public class ReQuerySequence: ReQuery {
 	}
 
 	public func eqJoin(leftField: ReQueryValue, foreign: ReQueryTable, options: ReEqJoinArg...) -> ReQuerySequence {
-		return ReQuerySequence(jsonSerialization: [ReTerm.EQ_JOIN.rawValue, [self.jsonSerialization, leftField.jsonSerialization, foreign.jsonSerialization], R.optargs(options)])
+		return ReQuerySequence(jsonSerialization: [ReTerm.EQ_JOIN.rawValue, [self.jsonSerialization, leftField.jsonSerialization, foreign.jsonSerialization], R.optargs(args: options)])
 	}
 
 	public func map(mapper: ReQueryLambda) -> ReQuerySequence {
@@ -336,7 +312,7 @@ public class ReQuerySequence: ReQuery {
 	}
 
 	public func map(block: RePredicate) -> ReQuerySequence {
-		return self.map(ReQueryLambda(block: block))
+        return self.map(mapper: ReQueryLambda(block: block))
 	}
 
 	public func withFields(fields: [ReQueryValue]) -> ReQuerySequence {
@@ -349,11 +325,11 @@ public class ReQuerySequence: ReQuery {
 	}
 
 	public func delete(options: ReDeleteArg...) -> ReQueryValue {
-		return ReDatum(jsonSerialization: [ReTerm.DELETE.rawValue, [self.jsonSerialization], R.optargs(options)])
+		return ReDatum(jsonSerialization: [ReTerm.DELETE.rawValue, [self.jsonSerialization], R.optargs(args: options)])
 	}
 
 	public func changes(options: ReChangesArg...) -> ReQueryStream {
-		return ReQueryStream(jsonSerialization: [ReTerm.CHANGES.rawValue, [self.jsonSerialization], R.optargs(options)])
+		return ReQueryStream(jsonSerialization: [ReTerm.CHANGES.rawValue, [self.jsonSerialization], R.optargs(args: options)])
 	}
 
 	/** In its first form, fold operates like reduce, returning a value by applying a combining function to each element 
@@ -362,7 +338,7 @@ public class ReQuerySequence: ReQuery {
 	- it is guaranteed to proceed through the sequence from first element to last.
 	- it passes an initial base value to the function with the first element in place of the previous reduction result. */
 	public func fold(base: ReQueryValue, accumulator: ReQueryLambda, options: ReFoldArg...) -> ReQueryValue {
-		return ReDatum(jsonSerialization: [ReTerm.FOLD.rawValue, [self.jsonSerialization, base.jsonSerialization, accumulator.jsonSerialization], R.optargs(options)])
+		return ReDatum(jsonSerialization: [ReTerm.FOLD.rawValue, [self.jsonSerialization, base.jsonSerialization, accumulator.jsonSerialization], R.optargs(args: options)])
 	}
 }
 
@@ -381,23 +357,23 @@ public class ReQueryStream: ReQuerySequence {
 
 public class ReQueryTable: ReQuerySequence {
 	private init(database: ReQueryDatabase, name: String, options: [ReTableArg]) {
-		let x = R.optargs(options)
+		let x = R.optargs(args: options)
 		super.init(jsonSerialization: [ReTerm.TABLE.rawValue, [database.jsonSerialization, name], x])
 	}
 
 	/** Insert documents into a table. */
 	public func insert(documents: [ReDocument], options: ReInsertArg...) -> ReQueryValue {
-		return ReDatum(jsonSerialization: [ReTerm.INSERT.rawValue, [self.jsonSerialization, [ReTerm.MAKE_ARRAY.rawValue, documents]], R.optargs(options)])
+		return ReDatum(jsonSerialization: [ReTerm.INSERT.rawValue, [self.jsonSerialization, [ReTerm.MAKE_ARRAY.rawValue, documents]], R.optargs(args: options)])
 	}
 
 	/** Insert documents into a table. */
 	public func insert(objects: [ReQueryValue], options: ReInsertArg...) -> ReQueryValue {
-		return ReDatum(jsonSerialization: [ReTerm.INSERT.rawValue, [self.jsonSerialization, [ReTerm.MAKE_ARRAY.rawValue, objects.map { return $0.jsonSerialization }]], R.optargs(options)])
+		return ReDatum(jsonSerialization: [ReTerm.INSERT.rawValue, [self.jsonSerialization, [ReTerm.MAKE_ARRAY.rawValue, objects.map { return $0.jsonSerialization }]], R.optargs(args: options)])
 	}
 
 	/** Update JSON documents in a table. Accepts a JSON document, a ReQL expression, or a combination of the two. */
 	public func update(changes: ReDocument, options: ReUpdateArg...) -> ReQueryValue {
-		return ReDatum(jsonSerialization: [ReTerm.UPDATE.rawValue, [self.jsonSerialization, changes], R.optargs(options)])
+		return ReDatum(jsonSerialization: [ReTerm.UPDATE.rawValue, [self.jsonSerialization, changes], R.optargs(args: options)])
 	}
 
 	/** Replace documents in a table. Accepts a JSON document or a ReQL expression, and replaces the original document with
@@ -408,7 +384,7 @@ public class ReQueryTable: ReQuerySequence {
 	will be deleted. Since update and replace operations are performed atomically, this allows atomic inserts and deletes 
 	as well. */
 	public func replace(changes: ReDocument, options: ReUpdateArg...) -> ReQueryValue {
-		return ReDatum(jsonSerialization: [ReTerm.REPLACE.rawValue, [self.jsonSerialization, changes], R.optargs(options)])
+		return ReDatum(jsonSerialization: [ReTerm.REPLACE.rawValue, [self.jsonSerialization, changes], R.optargs(args: options)])
 	}
 
 	/** Create a new secondary index on a table. Secondary indexes improve the speed of many read queries at the slight 
@@ -418,9 +394,9 @@ public class ReQueryTable: ReQuerySequence {
 	indexStatus. If successful, createIndex will return an object of the form {"created": 1}. */
 	public func indexCreate(indexName: String, indexFunction: ReQueryLambda? = nil, options: ReIndexCreateArg...) -> ReQueryValue {
 		if let fn = indexFunction {
-			 return ReDatum(jsonSerialization: [ReTerm.INDEX_CREATE.rawValue, [self.jsonSerialization, indexName, fn.jsonSerialization], R.optargs(options)])
+			 return ReDatum(jsonSerialization: [ReTerm.INDEX_CREATE.rawValue, [self.jsonSerialization, indexName, fn.jsonSerialization], R.optargs(args: options)])
 		}
-		return ReDatum(jsonSerialization: [ReTerm.INDEX_CREATE.rawValue, [self.jsonSerialization, indexName], R.optargs(options)])
+		return ReDatum(jsonSerialization: [ReTerm.INDEX_CREATE.rawValue, [self.jsonSerialization, indexName], R.optargs(args: options)])
 	}
 
 	public func indexWait() -> ReQueryValue {
@@ -437,7 +413,7 @@ public class ReQueryTable: ReQuerySequence {
 
 	/** Rename an existing secondary index on a table.  */
 	public func indexRename(renameIndex: String, to: String, options: ReIndexRenameArg...) -> ReQueryValue {
-		return ReDatum(jsonSerialization: [ReTerm.INDEX_RENAME.rawValue, [self.jsonSerialization, renameIndex, to], R.optargs(options)])
+		return ReDatum(jsonSerialization: [ReTerm.INDEX_RENAME.rawValue, [self.jsonSerialization, renameIndex, to], R.optargs(args: options)])
 	}
 
 	/** Get the status of the specified indexes on this table, or the status of all indexes on this table if no indexes 
@@ -481,11 +457,11 @@ public class ReQueryTable: ReQuerySequence {
 	}
 
 	public func grant(userName: String, permissions: RePermission...) -> ReQueryValue {
-		return ReDatum(jsonSerialization: [ReTerm.GRANT.rawValue, [self.jsonSerialization, userName], R.optargs(permissions)])
+		return ReDatum(jsonSerialization: [ReTerm.GRANT.rawValue, [self.jsonSerialization, userName], R.optargs(args: permissions)])
 	}
 
 	public func getIntersecting(geometry: ReQueryGeometry, options: ReIntersectingArg...) -> ReQuerySelection {
-		return ReQuerySelection(jsonSerialization: [ReTerm.GET_INTERSECTING.rawValue, [self.jsonSerialization, geometry.jsonSerialization], R.optargs(options)])
+		return ReQuerySelection(jsonSerialization: [ReTerm.GET_INTERSECTING.rawValue, [self.jsonSerialization, geometry.jsonSerialization], R.optargs(args: options)])
 	}
 }
 
@@ -502,7 +478,7 @@ public class ReQueryRow: ReDatum {
 	}
 
 	public func delete(options: ReDeleteArg...) -> ReQueryValue {
-		return ReDatum(jsonSerialization: [ReTerm.DELETE.rawValue, [self.jsonSerialization], R.optargs(options)])
+		return ReDatum(jsonSerialization: [ReTerm.DELETE.rawValue, [self.jsonSerialization], R.optargs(args: options)])
 	}
 
 	public func keys() -> ReQueryValue {
@@ -525,10 +501,10 @@ public extension ReQuery {
 		let query: [AnyObject] = [ReProtocol.ReQueryType.START.rawValue, self.jsonSerialization];
 
 		do {
-			let json = try NSJSONSerialization.dataWithJSONObject(query, options: [])
+            let json = try NSJSONSerialization.data(withJSONObject: query, options: [])
 			//let ss = NSString(data: json, encoding: NSUTF8StringEncoding)!
 			//print("JSON=\(ss)")
-			try connection.startQuery(json, callback: callback)
+            try connection.startQuery(query: json, callback: callback)
 		}
 		catch {
 			callback(ReResponse.Error("An unknown error occurred"))
@@ -666,7 +642,7 @@ public extension ReQueryValue {
 	}
 
 	public func xor(other: ReQueryValue) -> ReQueryValue {
-		return self.and(other.not()).or(self.not().and(other))
+		return self.and(value: other.not()).or(value: self.not().and(value: other))
 	}
 
 	public func merge(value: ReQueryValue) -> ReQueryValue {
@@ -674,7 +650,7 @@ public extension ReQueryValue {
 	}
 
 	public func branch(ifTrue: ReQueryValue, _ ifFalse: ReQueryValue) -> ReQueryValue {
-		return R.branch(self, ifTrue: ifTrue, ifFalse: ifFalse)
+		return R.branch(test: self, ifTrue: ifTrue, ifFalse: ifFalse)
 	}
 
 	public subscript(key: String) -> ReQueryValue {
@@ -683,55 +659,55 @@ public extension ReQueryValue {
 }
 
 public func +(lhs: ReQueryValue, rhs: ReQueryValue) -> ReQueryValue {
-	return lhs.add(rhs)
+	return lhs.add(value: rhs)
 }
 
 public func -(lhs: ReQueryValue, rhs: ReQueryValue) -> ReQueryValue {
-	return lhs.sub(rhs)
+	return lhs.sub(value: rhs)
 }
 
 public func *(lhs: ReQueryValue, rhs: ReQueryValue) -> ReQueryValue {
-	return lhs.mul(rhs)
+	return lhs.mul(value: rhs)
 }
 
 public func /(lhs: ReQueryValue, rhs: ReQueryValue) -> ReQueryValue {
-	return lhs.div(rhs)
+	return lhs.div(value: rhs)
 }
 
 public func %(lhs: ReQueryValue, rhs: ReQueryValue) -> ReQueryValue {
-	return lhs.mod(rhs)
+	return lhs.mod(value: rhs)
 }
 
 public func &&(lhs: ReQueryValue, rhs: ReQueryValue) -> ReQueryValue {
-	return lhs.and(rhs)
+	return lhs.and(value: rhs)
 }
 
 public func ||(lhs: ReQueryValue, rhs: ReQueryValue) -> ReQueryValue {
-	return lhs.or(rhs)
+	return lhs.or(value: rhs)
 }
 
 public func ==(lhs: ReQueryValue, rhs: ReQueryValue) -> ReQueryValue {
-	return lhs.eq(rhs)
+	return lhs.eq(value: rhs)
 }
 
 public func !=(lhs: ReQueryValue, rhs: ReQueryValue) -> ReQueryValue {
-	return lhs.ne(rhs)
+	return lhs.ne(value: rhs)
 }
 
 public func >(lhs: ReQueryValue, rhs: ReQueryValue) -> ReQueryValue {
-	return lhs.gt(rhs)
+	return lhs.gt(value: rhs)
 }
 
 public func >=(lhs: ReQueryValue, rhs: ReQueryValue) -> ReQueryValue {
-	return lhs.ge(rhs)
+	return lhs.ge(value: rhs)
 }
 
 public func <(lhs: ReQueryValue, rhs: ReQueryValue) -> ReQueryValue {
-	return lhs.lt(rhs)
+	return lhs.lt(value: rhs)
 }
 
 public func <=(lhs: ReQueryValue, rhs: ReQueryValue) -> ReQueryValue {
-	return lhs.le(rhs)
+	return lhs.le(value: rhs)
 }
 
 public prefix func !(lhs: ReQueryValue) -> ReQueryValue {
@@ -769,7 +745,7 @@ public class ReQueryGeometry: ReDatum {
 	model, the results of distance should be considered approximate due to the deviation between the ellipsoid and spherical
 	models. */
 	public func distance(geometry: ReQueryGeometry, options: ReDistanceArg...) -> ReQueryValue {
-		return ReDatum(jsonSerialization: [ReTerm.DISTANCE.rawValue, [self.jsonSerialization, geometry.jsonSerialization], R.optargs(options)])
+        return ReDatum(jsonSerialization: [ReTerm.DISTANCE.rawValue, [self.jsonSerialization, geometry.jsonSerialization], R.optargs(args: options)])
 	}
 
 	/** Convert a ReQL geometry object to a GeoJSON object. */

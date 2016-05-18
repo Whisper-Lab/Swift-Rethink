@@ -1,0 +1,5 @@
+module SCRAM {
+    header "../SCRAM.h"
+    link "SCRAM"
+    export *
+}

@@ -1,11 +1,43 @@
-Rethink.swift
+Swift-Rethink
 -------------
 
 A client driver for RethinkDB in Swift.
 
-Looking for a Mac app to easily query RethinkDB? Convert and analyze large data sets at the speed of light with [Warp](http://warp.one). 
+## Prerequisites
 
-### Usage
+### Swift
+* Swift Open Source `swift-DEVELOPMENT-SNAPSHOT-2016-04-25-a` toolchain (**Minimum REQUIRED for latest release**)
+* Swift Open Source `swift-DEVELOPMENT-SNAPSHOT-2016-05-03-a` toolchain (**Recommended**)
+
+### OS X
+
+* OS X 10.11.0 (*El Capitan*) or higher
+* Xcode Version 7.3.1 (7D1012) or higher using the one of the above toolchains (*Recommended*)
+
+### Linux
+
+* Ubuntu 15.10 (or 14.04)
+* One of the Swift Open Source toolchains listed above
+
+## Build
+
+To build Rethink from the command line:
+
+```
+% cd <path-to-clone>
+% swift build
+```
+
+## Using Swift-Rethink
+
+### Before starting
+
+The first you need to do is import the Rethink framework.  This is done by the following:
+```
+import Rethink
+```
+
+### Example
 
 ```swift
 self.connection = R.connect(NSURL(string: "rethinkdb://localhost:28016")!, user: "admin", password: "") { err in
@@ -49,40 +81,3 @@ self.connection = R.connect(NSURL(string: "rethinkdb://localhost:28016")!, user:
 The driver implements the V1_0 protocol (which supports username/password authentication using SCRAM, and is available 
 from RethinkDB 2.3.0). Alternatively, you can also use V0_4. Some commands and optional arguments may still be missing,
 but are usually easy to add to the code.
-
-### Installation
-
-Drag Rethink.xcodeproj into your own project, then add Rethink.framework as dependency (build targets) and link to it.
-You should then be able to simply 'import Rethink' from Swift code.
-
-### License
-
-```
-Rethink.swift. Copyright (c) 2015-2016 Pixelspark
-
-Permission is hereby granted, free of charge, to any person
-obtaining a copy of this software and associated documentation
-files (the "Software"), to deal in the Software without
-restriction, including without limitation the rights to use,
-copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following
-conditions:
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-OTHER DEALINGS IN THE SOFTWARE.
-```
-
-### FAQ
-
-- __Can I contribute?__
-
-Feel free to send a pull request. If you want to implement a new feature, please open
-an issue first, especially if it's a non backward compatible one.
